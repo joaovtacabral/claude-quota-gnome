@@ -41,7 +41,7 @@ As barras ficam **amarelas** aos 60% e **vermelhas** aos 80%.
 
 Busca os dados reais de quota da API da Anthropic (`api.anthropic.com/api/oauth/usage`) usando o token OAuth armazenado pelo Claude Code em `~/.claude/.credentials.json`. Nenhuma chave de API manual é necessária.
 
-Atualiza automaticamente **a cada 2 minutos** e também **sempre que o menu é aberto**.
+Atualiza automaticamente **a cada 1 minuto** e também **sempre que o menu é aberto**.
 
 ## Requisitos
 

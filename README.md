@@ -4,29 +4,12 @@ Extensão do GNOME Shell que exibe a quota real do [Claude Code](https://claude.
 
 ## O que exibe
 
+<img width="311" height="379" alt="image" src="https://github.com/user-attachments/assets/4219f21f-336c-4acf-8837-6fb7d2bdc063" />
+
 **Na barra superior:**
-- `[ícone] 45%` — porcentagem do limite diário consumido
+- Porcentagem do limite de sessão consumido
 
 **Ao clicar:**
-
-```
-── Sessão ─────────────────────────────
-  45.0% usado          reseta em 2h 30min
-  [█████████████░░░░░░░░░░░░░░░░░]
-
-── Diário ─────────────────────────────
-  6.2% usado           reseta em 14h 10min
-  [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░]
-
-── Semanal ────────────────────────────
-  3.1% usado           reseta em 4d 6h
-  [█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░]
-
-── Atividade ──────────────────────────
-  Prompts hoje:    12
-  Prompts semana:  47
-  Sessões ativas:  1
-```
 
 As barras ficam **amarelas** aos 60% e **vermelhas** aos 80%.
 

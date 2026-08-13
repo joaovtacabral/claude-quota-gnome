@@ -306,9 +306,11 @@ export default class ClaudeQuotaExtension extends Extension {
         }
 
         // Label do painel: maior percentual entre os grupos
-        if (highestPct !== null) {
-            this._label.set_text(`${highestPct.toFixed(0)}%`);
-        }
+        // Painel: prioriza diário, depois o maior entre os grupos
+        const dailyLimit = limits.find(l => l.group === 'daily');
+        const panelPct   = dailyLimit ? dailyLimit.percent : highestPct;
+        if (panelPct !== null)
+            this._label.set_text(`${panelPct.toFixed(0)}%`);
     }
 
     _updateLocal() {

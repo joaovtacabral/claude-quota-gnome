@@ -312,8 +312,8 @@ export default class ClaudeQuotaExtension extends Extension {
             if (highestPct === null || pct > highestPct) highestPct = pct;
         }
 
-        const dailyLimit = limits.find(l => l.group === 'daily');
-        const panelPct   = dailyLimit?.percent ?? highestPct;
+        const sessionLimit = limits.find(l => l.group === 'session');
+        const panelPct = sessionLimit?.percent ?? highestPct;
         this._label.set_text(panelPct !== null ? `${panelPct.toFixed(0)}%` : '—');
     }
 

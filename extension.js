@@ -41,15 +41,15 @@ function formatRelative(ms, nowMs) {
 
 function formatResetsAt(isoStr) {
     const diff = new Date(isoStr).getTime() - Date.now();
-    if (diff <= 0) return 'agora';
+    if (diff <= 0) return 'menos de 1min';
     const mins = Math.floor(diff / 60_000);
-    if (mins < 60) return `em ${mins}min`;
+    if (mins < 60) return `reseta em ${mins}min`;
     const hrs  = Math.floor(mins / 60);
     const remM = mins % 60;
-    if (hrs < 24) return `em ${hrs}h${remM ? `${remM}min` : ''}`;
+    if (hrs < 24) return `reseta em ${hrs}h ${remM ? `${remM}min` : ''}`;
     const days = Math.floor(hrs / 24);
     const remH = hrs % 24;
-    return `em ${days}d${remH ? `${remH}h` : ''}`;
+    return `reseta em ${days}d ${remH ? `${remH}h` : ''}`;
 }
 
 // ── Credenciais ───────────────────────────────────────────────────────────────

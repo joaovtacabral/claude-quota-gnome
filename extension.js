@@ -13,7 +13,7 @@ const API_INTERVAL = 60;  // segundos entre chamadas à API
 const LOCAL_INTERVAL = 60;    // segundos entre leituras locais
 const BAR_WIDTH    = 220;     // px
 
-const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+const SPINNER = ['⠋', '⠙', '⠸', '⠼', '⠦', '⠇'];
 
 const GROUP_LABELS = {
     session: 'Sessão',
@@ -239,10 +239,13 @@ export default class ClaudeQuotaExtension extends Extension {
 
     _startSpinner() {
         if (this._spinnerTimer) return;
-        let frame = 0;
-        this._spinnerTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 120, () => {
-            this._label.set_text(SPINNER[frame++ % SPINNER.length]);
-            return GLib.SOURCE_CONTINUE;
+        this._spinnerFrame = 0;
+        this._label.set_text(SPINNER[0]);
+        this._spinnerTimer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
+            if (!this._label) return false;
+            this._spinnerFrame = (this._spinnerFrame + 1) % SPINNER.length;
+            this._label.set_text(SPINNER[this._spinnerFrame]);
+            return true;
         });
     }
 

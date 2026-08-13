@@ -6,7 +6,6 @@ Extensão do GNOME Shell que exibe a quota real do [Claude Code](https://claude.
 
 **Na barra superior:**
 - `[ícone] 45%` — porcentagem do limite diário consumido
-- `[ícone] 45% [1]` — com uma sessão do Claude Code ativa
 
 **Ao clicar:**
 
@@ -32,6 +31,8 @@ Extensão do GNOME Shell que exibe a quota real do [Claude Code](https://claude.
 ```
 
 As barras ficam **amarelas** aos 60% e **vermelhas** aos 80%.
+
+Ao abrir o menu, os dados são atualizados imediatamente. Enquanto consulta a API, o título do menu exibe uma animação de carregamento (`Consultando ⠋`).
 
 ## Como funciona
 

@@ -10,8 +10,6 @@ Extensão do GNOME Shell que exibe a quota real do [Claude Code](https://claude.
 **Ao clicar:**
 
 ```
-── Claude Max ─────────────────────────
-
 ── Sessão ─────────────────────────────
   45.0% usado          reseta em 2h 30min
   [█████████████░░░░░░░░░░░░░░░░░]
@@ -32,7 +30,7 @@ Extensão do GNOME Shell que exibe a quota real do [Claude Code](https://claude.
 
 As barras ficam **amarelas** aos 60% e **vermelhas** aos 80%.
 
-Ao abrir o menu, os dados são atualizados imediatamente. Enquanto consulta a API, o título do menu exibe uma animação de carregamento (`Consultando ⠋`).
+Ao abrir o menu, os dados são atualizados imediatamente. Enquanto consulta a API, o ícone na barra exibe uma animação de carregamento (`⠋`).
 
 ## Como funciona
 

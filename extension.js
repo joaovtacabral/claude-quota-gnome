@@ -202,16 +202,18 @@ export default class ClaudeQuotaExtension extends Extension {
 
         Main.panel.addToStatusArea('claude-quota', this._indicator);
 
-        this._menuConn = menu.connect('open-state-changed', (_, open) => {
-            if (open) {
-                this._updateAPI();
-                this._updateLocal();
-            }
+        this._clickConn = this._indicator.connect('button-press-event', () => {
+            this._updateAPI();
+            this._updateLocal();
         });
 
         this._apiData = null;
-        this._updateAPI();
-        this._updateLocal();
+        // Delay inicial para garantir que o shell terminou de carregar
+        GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 2, () => {
+            this._updateAPI();
+            this._updateLocal();
+            return false;
+        });
 
         this._apiTimer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, API_INTERVAL, () => {
             this._updateAPI();
@@ -224,9 +226,9 @@ export default class ClaudeQuotaExtension extends Extension {
     }
 
     disable() {
-        if (this._menuConn) {
-            this._indicator?.menu.disconnect(this._menuConn);
-            this._menuConn = null;
+        if (this._clickConn) {
+            this._indicator?.disconnect(this._clickConn);
+            this._clickConn = null;
         }
         this._stopSpinner();
         [this._apiTimer, this._localTimer].forEach(id => {
@@ -241,11 +243,11 @@ export default class ClaudeQuotaExtension extends Extension {
         if (this._spinnerTimer) return;
         this._spinnerFrame = 0;
         this._label.set_text(SPINNER[0]);
-        this._spinnerTimer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
-            if (!this._label) return false;
+        this._spinnerTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250, () => {
+            if (!this._label) return GLib.SOURCE_REMOVE;
             this._spinnerFrame = (this._spinnerFrame + 1) % SPINNER.length;
             this._label.set_text(SPINNER[this._spinnerFrame]);
-            return true;
+            return GLib.SOURCE_CONTINUE;
         });
     }
 

@@ -1,43 +1,53 @@
 # Claude Code Quota Monitor
 
-Extensão do GNOME Shell que exibe o uso de tokens do [Claude Code](https://claude.ai/code) com uma barra de progresso na barra superior.
+Extensão do GNOME Shell que exibe a quota real do [Claude Code](https://claude.ai/code) diretamente na barra superior, buscando os dados da API da Anthropic.
 
 ## O que exibe
 
 **Na barra superior:**
-- `[ícone] 32.2K` — tokens usados hoje (entrada + saída)
-- `[ícone] 32.2K [1]` — com uma sessão do Claude Code ativa
+- `[ícone] 45%` — porcentagem do limite diário consumido
+- `[ícone] 45% [1]` — com uma sessão do Claude Code ativa
 
 **Ao clicar:**
 
 ```
-── Hoje ───────────────────────────────
-  32.2K / 500K tokens          6%
-  [████░░░░░░░░░░░░░░░░░░░░░░░░]
+── Claude Max ─────────────────────────
 
-── Esta Semana ────────────────────────
-  128K / 3.5M tokens           3%
-  [██░░░░░░░░░░░░░░░░░░░░░░░░░░]
+── Sessão ─────────────────────────────
+  45.0% usado          reseta em 2h 30min
+  [█████████████░░░░░░░░░░░░░░░░░]
 
-── Detalhes ───────────────────────────
-  Entrada:          0.1K
-  Saída:            32.2K
-  Cache lido:       1.2M
-  Prompts hoje:     12
-  Prompts semana:   47
-  Sessões ativas:   1
+── Diário ─────────────────────────────
+  6.2% usado           reseta em 14h 10min
+  [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░]
+
+── Semanal ────────────────────────────
+  3.1% usado           reseta em 4d 6h
+  [█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░]
+
+── Atividade ──────────────────────────
+  Prompts hoje:    12
+  Prompts semana:  47
+  Sessões ativas:  1
 
 ── Último prompt ───────────────────────
   há 5min
-  "adicionar barra de progresso ao uso de tokens"
+  "atualizar o README com as últimas mudanças"
 ```
 
-As barras ficam **amarelas** aos 60% e **vermelhas** aos 80% dos respectivos limites.
+As barras ficam **amarelas** aos 60% e **vermelhas** aos 80%.
+
+## Como funciona
+
+Busca os dados reais de quota da API da Anthropic (`api.anthropic.com/api/oauth/usage`) usando o token OAuth armazenado pelo Claude Code em `~/.claude/.credentials.json`. Nenhuma chave de API manual é necessária.
+
+Atualiza automaticamente **a cada 2 minutos** e também **sempre que o menu é aberto**.
 
 ## Requisitos
 
 - GNOME Shell 45, 46 ou 47
-- [Claude Code](https://claude.ai/code) instalado e usado ao menos uma vez
+- [Claude Code](https://claude.ai/code) instalado e com sessão ativa (para o token OAuth)
+- `curl` instalado (padrão no Ubuntu)
 
 ## Instalação
 
@@ -66,27 +76,6 @@ bash install.sh
 ```
 
 Depois reinicie o GNOME Shell: `Alt+F2` → `r` → `Enter`.
-
-## Configurar os limites de tokens
-
-Abra as preferências para definir os limites diário e semanal:
-
-```bash
-gnome-extensions prefs claude-quota@monitor
-```
-
-Ou acesse **Configurações → Extensões → Claude Code Quota Monitor → Preferências**.
-
-| Campo | Padrão |
-|---|---|
-| Limite diário | 500 000 tokens |
-| Limite semanal | 3 500 000 tokens |
-
-## Como funciona
-
-Lê o uso de tokens diretamente de `~/.claude/projects/**/*.jsonl` — os mesmos arquivos que o Claude Code usa para armazenar o histórico de conversas. Não requer chave de API nem conexão com a internet.
-
-Atualiza a cada 60 segundos.
 
 ## Ícone
 

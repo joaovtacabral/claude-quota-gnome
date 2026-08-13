@@ -5,8 +5,8 @@ A GNOME Shell extension that shows your [Claude Code](https://claude.ai/code) to
 ## What it shows
 
 **In the top bar:**
-- `⚡ 32.2K` — tokens used today (input + output)
-- `⚡ 32.2K [1]` — with an active Claude Code session running
+- Claude Code icon + `32.2K` — tokens used today (input + output)
+- Claude Code icon + `32.2K [1]` — with an active Claude Code session running
 
 **Click to expand:**
 
@@ -67,6 +67,10 @@ Or go to **Settings → Extensions → Claude Code Quota Monitor → Preferences
 Reads token usage directly from `~/.claude/projects/**/*.jsonl` — the same files Claude Code uses to store conversation history. No API key required, no network requests.
 
 Updates every 60 seconds.
+
+## Icon
+
+The panel icon is `claude-code.svg`, bundled with the extension and loaded directly from disk — no system icon theme required. To swap it out, replace `claude-code.svg` in the extension directory (`~/.local/share/gnome-shell/extensions/claude-quota@monitor/`) with any same-named SVG and restart GNOME Shell.
 
 ## License
 

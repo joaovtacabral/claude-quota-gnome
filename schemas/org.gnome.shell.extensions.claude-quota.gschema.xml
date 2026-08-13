@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.claude-quota"
+          path="/org/gnome/shell/extensions/claude-quota/">
+    <key name="daily-token-limit" type="i">
+      <default>500000</default>
+      <summary>Daily token limit</summary>
+      <description>Your daily token budget (input + output). Used for the progress bar.</description>
+    </key>
+  </schema>
+</schemalist>

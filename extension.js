@@ -268,6 +268,14 @@ export default class ClaudeQuotaExtension extends Extension {
             this._stopSpinner();
             if (err || !data) {
                 console.error('[claude-quota] API error:', err);
+                this._label.set_text('erro');
+                this._planItem.label.set_text('Erro ao consultar');
+                return;
+            }
+            if (data.type === 'error') {
+                console.error('[claude-quota] API error:', data.error?.message);
+                this._label.set_text('erro');
+                this._planItem.label.set_text(data.error?.message ?? 'Erro na API');
                 return;
             }
             this._apiData = data;
@@ -279,19 +287,17 @@ export default class ClaudeQuotaExtension extends Extension {
         const data = this._apiData;
         if (!data) return;
 
-        // Título do menu com plano
         const planName = plan
             ? `Claude ${plan.charAt(0).toUpperCase() + plan.slice(1)}`
             : 'Claude';
         this._planItem.label.set_text(planName);
 
-        // Esconder todas as barras
         for (const bar of Object.values(this._groupBars)) {
             bar.sep.visible  = false;
             bar.item.visible = false;
         }
 
-        const limits = data?.limits ?? [];
+        const limits = Array.isArray(data.limits) ? data.limits : [];
         let highestPct = null;
 
         for (const limit of limits) {
@@ -312,12 +318,9 @@ export default class ClaudeQuotaExtension extends Extension {
             if (highestPct === null || pct > highestPct) highestPct = pct;
         }
 
-        // Label do painel: maior percentual entre os grupos
-        // Painel: prioriza diário, depois o maior entre os grupos
         const dailyLimit = limits.find(l => l.group === 'daily');
-        const panelPct   = dailyLimit ? dailyLimit.percent : highestPct;
-        if (panelPct !== null)
-            this._label.set_text(`${panelPct.toFixed(0)}%`);
+        const panelPct   = dailyLimit?.percent ?? highestPct;
+        this._label.set_text(panelPct !== null ? `${panelPct.toFixed(0)}%` : '—');
     }
 
     _updateLocal() {

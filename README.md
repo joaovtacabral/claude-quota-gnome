@@ -7,9 +7,11 @@ Extensão do GNOME Shell que exibe a quota real do [Claude Code](https://claude.
 <img width="311" height="379" alt="image" src="https://github.com/user-attachments/assets/4219f21f-336c-4acf-8837-6fb7d2bdc063" />
 
 **Na barra superior:**
-- Porcentagem do limite de sessão consumido
+- Porcentagem do limite de **sessão** consumido
 
 **Ao clicar:**
+- Barras de progresso por período: sessão, diário, semanal e mensal — cada uma com percentual, tempo até reset e cor indicativa
+- Atividade local: prompts hoje, prompts na semana e sessões ativas
 
 As barras ficam **amarelas** aos 60% e **vermelhas** aos 80%.
 

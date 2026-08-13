@@ -13,6 +13,8 @@ const API_INTERVAL = 60;  // segundos entre chamadas à API
 const LOCAL_INTERVAL = 60;    // segundos entre leituras locais
 const BAR_WIDTH    = 220;     // px
 
+const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+
 const GROUP_LABELS = {
     session: 'Sessão',
     daily:   'Diário',
@@ -229,12 +231,29 @@ export default class ClaudeQuotaExtension extends Extension {
             this._indicator?.menu.disconnect(this._menuConn);
             this._menuConn = null;
         }
+        this._stopSpinner();
         [this._apiTimer, this._localTimer].forEach(id => {
             if (id) GLib.source_remove(id);
         });
         this._apiTimer = this._localTimer = null;
         this._indicator?.destroy();
         this._indicator = null;
+    }
+
+    _startSpinner() {
+        if (this._spinnerTimer) return;
+        let frame = 0;
+        this._spinnerTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 120, () => {
+            this._planItem.label.set_text(`Consultando ${SPINNER[frame++ % SPINNER.length]}`);
+            return GLib.SOURCE_CONTINUE;
+        });
+    }
+
+    _stopSpinner() {
+        if (this._spinnerTimer) {
+            GLib.source_remove(this._spinnerTimer);
+            this._spinnerTimer = null;
+        }
     }
 
     _updateAPI() {
@@ -244,7 +263,9 @@ export default class ClaudeQuotaExtension extends Extension {
             return;
         }
 
+        this._startSpinner();
         fetchQuota(creds.token, (err, data) => {
+            this._stopSpinner();
             if (err || !data) {
                 console.error('[claude-quota] API error:', err);
                 return;

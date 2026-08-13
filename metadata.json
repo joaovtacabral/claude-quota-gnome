@@ -1,0 +1,8 @@
+{
+  "name": "Claude Code Quota Monitor",
+  "description": "Shows Claude Code usage stats in the GNOME top bar",
+  "uuid": "claude-quota@monitor",
+  "version": 1,
+  "shell-version": ["45", "46", "47"],
+  "url": ""
+}

@@ -9,7 +9,7 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 const API_URL      = 'https://api.anthropic.com/api/oauth/usage';
 const API_BETA     = 'oauth-2025-04-20';
-const API_INTERVAL = 60;  // segundos entre chamadas à API
+const API_INTERVAL = 300;  // segundos entre chamadas à API
 const LOCAL_INTERVAL = 60;    // segundos entre leituras locais
 const BAR_WIDTH    = 220;     // px
 

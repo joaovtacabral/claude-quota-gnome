@@ -30,7 +30,7 @@ Extensão do GNOME Shell que exibe a quota real do [Claude Code](https://claude.
 
 As barras ficam **amarelas** aos 60% e **vermelhas** aos 80%.
 
-Ao abrir o menu, os dados são atualizados imediatamente. Enquanto consulta a API, o ícone na barra exibe uma animação de carregamento (`⠋`).
+Ao abrir o menu, os dados são atualizados imediatamente. Enquanto consulta a API, o ícone na barra exibe uma animação de carregamento (`⠋`). Em caso de erro, a última porcentagem consultada é mantida na barra.
 
 ## Como funciona
 

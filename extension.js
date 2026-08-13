@@ -29,16 +29,6 @@ function readFileSafe(path) {
     } catch (_) { return null; }
 }
 
-function formatRelative(ms, nowMs) {
-    const diff = Math.max(0, nowMs - ms);
-    const mins = Math.floor(diff / 60_000);
-    if (mins < 1)  return 'agora mesmo';
-    if (mins < 60) return `há ${mins}min`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24)  return `há ${hrs}h`;
-    return `há ${Math.floor(hrs / 24)}d`;
-}
-
 function formatResetsAt(isoStr) {
     const diff = new Date(isoStr).getTime() - Date.now();
     if (diff <= 0) return 'menos de 1min';
@@ -105,12 +95,11 @@ function weekStartMs() {
 }
 
 function gatherLocalStats() {
-    const home      = GLib.get_home_dir();
-    const todayStr  = new Date().toISOString().slice(0, 10);
-    const nowMs     = Date.now();
-    const weekMs    = weekStartMs();
+    const home     = GLib.get_home_dir();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const weekMs   = weekStartMs();
 
-    let promptsToday = 0, promptsWeek = 0, lastActivity = null, activeSessions = 0;
+    let promptsToday = 0, promptsWeek = 0, activeSessions = 0;
 
     const histRaw = readFileSafe(GLib.build_filenamev([home, '.claude', 'history.jsonl']));
     if (histRaw) {
@@ -122,11 +111,8 @@ function gatherLocalStats() {
                 if (!ts) continue;
                 if (new Date(ts).getTime() < weekMs) continue;
                 promptsWeek++;
-                if (new Date(ts).toISOString().slice(0, 10) === todayStr) {
+                if (new Date(ts).toISOString().slice(0, 10) === todayStr)
                     promptsToday++;
-                    if (!lastActivity || ts > lastActivity.ms)
-                        lastActivity = { ms: ts, text: entry.display ?? '' };
-                }
             } catch (_) {}
         }
     }
@@ -147,11 +133,7 @@ function gatherLocalStats() {
         }
     } catch (_) {}
 
-    return {
-        promptsToday, promptsWeek, activeSessions,
-        lastTime: lastActivity ? formatRelative(lastActivity.ms, nowMs) : 'nunca',
-        lastText: lastActivity?.text ?? '',
-    };
+    return { promptsToday, promptsWeek, activeSessions };
 }
 
 // ── Extensão ──────────────────────────────────────────────────────────────────
@@ -218,13 +200,6 @@ export default class ClaudeQuotaExtension extends Extension {
         menu.addMenuItem(this._todayItem);
         menu.addMenuItem(this._weekItem);
         menu.addMenuItem(this._sessItem);
-
-        // Último prompt
-        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Último prompt'));
-        this._lastTimeItem = new PopupMenu.PopupMenuItem('', { reactive: false });
-        this._lastTextItem = new PopupMenu.PopupMenuItem('', { reactive: false });
-        menu.addMenuItem(this._lastTimeItem);
-        menu.addMenuItem(this._lastTextItem);
 
         Main.panel.addToStatusArea('claude-quota', this._indicator);
 
@@ -330,9 +305,6 @@ export default class ClaudeQuotaExtension extends Extension {
             this._todayItem.label.set_text(`  Prompts hoje:    ${s.promptsToday}`);
             this._weekItem.label.set_text(`  Prompts semana:  ${s.promptsWeek}`);
             this._sessItem.label.set_text(`  Sessões ativas:  ${s.activeSessions}`);
-            this._lastTimeItem.label.set_text(`  ${s.lastTime}`);
-            const preview = s.lastText.length > 60 ? s.lastText.slice(0, 57) + '…' : s.lastText;
-            this._lastTextItem.label.set_text(`  ${preview || '—'}`);
 
             // Badge de sessão ativa no painel
             if (s.activeSessions > 0 && this._label.get_text() !== '…') {

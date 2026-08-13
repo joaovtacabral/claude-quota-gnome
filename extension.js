@@ -15,13 +15,6 @@ const BAR_WIDTH    = 220;     // px
 
 const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
-const GROUP_LABELS = {
-    session: 'Sessão',
-    daily:   'Diário',
-    weekly:  'Semanal',
-    monthly: 'Mensal',
-};
-
 // ── Utilitários ───────────────────────────────────────────────────────────────
 
 function readFileSafe(path) {
@@ -165,34 +158,50 @@ export default class ClaudeQuotaExtension extends Extension {
         this._planItem = new PopupMenu.PopupSeparatorMenuItem('Claude');
         menu.addMenuItem(this._planItem);
 
-        // Barras dinâmicas por grupo (session, daily, weekly, monthly)
-        this._groupBars = {};
-        for (const [key, label] of Object.entries(GROUP_LABELS)) {
-            const sep  = new PopupMenu.PopupSeparatorMenuItem(label);
+        // helper: cria uma barra de progresso avulsa (sem adicionar ao menu)
+        const makeBar = (prefix) => {
             const item = new PopupMenu.PopupBaseMenuItem({ reactive: false, can_focus: false });
             const vbox = new St.BoxLayout({ vertical: true, x_expand: true, style: 'padding: 2px 0;' });
-
-            const row   = new St.BoxLayout({ x_expand: true });
-            const pctLbl  = new St.Label({ text: '—', x_expand: true });
+            const row  = new St.BoxLayout({ x_expand: true });
+            const pctLbl   = new St.Label({ text: prefix ? `${prefix}: —` : '—', x_expand: true });
             const resetLbl = new St.Label({ text: '', x_align: Clutter.ActorAlign.END, style: 'color: #aaa; font-size: 0.85em;' });
             row.add_child(pctLbl);
             row.add_child(resetLbl);
-
             const bg   = new St.Widget({ style: `width: ${BAR_WIDTH}px; height: 10px; background-color: rgba(255,255,255,0.15); border-radius: 5px; margin-top: 4px;` });
             const fill = new St.Widget({ style: `width: 0px; height: 10px; background-color: #57e389; border-radius: 5px;` });
             bg.add_child(fill);
-
             vbox.add_child(row);
             vbox.add_child(bg);
             item.add_child(vbox);
+            return { item, pctLbl, resetLbl, fill, prefix };
+        };
 
-            menu.addMenuItem(sep);
-            menu.addMenuItem(item);
+        // ── Sessão (sozinha) ────────────────────────────────────────────────
+        this._sessionSep = new PopupMenu.PopupSeparatorMenuItem('Sessão');
+        this._groupBars  = { session: makeBar(null) };
+        menu.addMenuItem(this._sessionSep);
+        menu.addMenuItem(this._groupBars.session.item);
+        this._sessionSep.visible              = false;
+        this._groupBars.session.item.visible  = false;
 
-            this._groupBars[key] = { sep, item, pctLbl, resetLbl, fill };
-            sep.visible  = false;
-            item.visible = false;
-        }
+        // ── Consumo: Diário + Semanal juntos ────────────────────────────────
+        this._consumoSep = new PopupMenu.PopupSeparatorMenuItem('Consumo');
+        this._groupBars.daily  = makeBar('Diário');
+        this._groupBars.weekly = makeBar('Semanal');
+        menu.addMenuItem(this._consumoSep);
+        menu.addMenuItem(this._groupBars.daily.item);
+        menu.addMenuItem(this._groupBars.weekly.item);
+        this._consumoSep.visible             = false;
+        this._groupBars.daily.item.visible   = false;
+        this._groupBars.weekly.item.visible  = false;
+
+        // ── Mensal (sozinha) ────────────────────────────────────────────────
+        this._monthSep = new PopupMenu.PopupSeparatorMenuItem('Mensal');
+        this._groupBars.monthly = makeBar(null);
+        menu.addMenuItem(this._monthSep);
+        menu.addMenuItem(this._groupBars.monthly.item);
+        this._monthSep.visible              = false;
+        this._groupBars.monthly.item.visible = false;
 
         // Atividade local
         menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Atividade'));
@@ -292,13 +301,14 @@ export default class ClaudeQuotaExtension extends Extension {
             : 'Claude';
         this._planItem.label.set_text(planName);
 
-        for (const bar of Object.values(this._groupBars)) {
-            bar.sep.visible  = false;
+        // Ocultar tudo antes de repopular
+        this._sessionSep.visible = this._consumoSep.visible = this._monthSep.visible = false;
+        for (const bar of Object.values(this._groupBars))
             bar.item.visible = false;
-        }
 
         const limits = Array.isArray(data.limits) ? data.limits : [];
         let highestPct = null;
+        let hasDaily = false, hasWeekly = false;
 
         for (const limit of limits) {
             const key = limit.group;
@@ -308,15 +318,22 @@ export default class ClaudeQuotaExtension extends Extension {
             const pct    = Math.min(100, Math.max(0, limit.percent ?? 0));
             const fillPx = Math.round((pct / 100) * BAR_WIDTH);
             const color  = pct < 60 ? '#57e389' : pct < 80 ? '#f5c211' : '#e01b24';
+            const label  = bar.prefix ? `${bar.prefix}: ${pct.toFixed(1)}% usado` : `${pct.toFixed(1)}% usado`;
 
             bar.fill.style = `width: ${fillPx}px; height: 10px; background-color: ${color}; border-radius: 5px;`;
-            bar.pctLbl.set_text(`${pct.toFixed(1)}% usado`);
+            bar.pctLbl.set_text(label);
             bar.resetLbl.set_text(limit.resets_at ? formatResetsAt(limit.resets_at) : '');
-            bar.sep.visible  = true;
             bar.item.visible = true;
+
+            if (key === 'session') this._sessionSep.visible = true;
+            if (key === 'monthly') this._monthSep.visible   = true;
+            if (key === 'daily')   hasDaily  = true;
+            if (key === 'weekly')  hasWeekly = true;
 
             if (highestPct === null || pct > highestPct) highestPct = pct;
         }
+
+        this._consumoSep.visible = hasDaily || hasWeekly;
 
         const dailyLimit = limits.find(l => l.group === 'daily');
         const panelPct   = dailyLimit?.percent ?? highestPct;

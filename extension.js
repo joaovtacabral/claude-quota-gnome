@@ -263,14 +263,8 @@ export default class ClaudeQuotaExtension extends Extension {
         this._startSpinner();
         fetchQuota(creds.token, (err, data) => {
             this._stopSpinner();
-            if (err || !data) {
-                console.error('[claude-quota] API error:', err);
-                this._label.set_text('erro');
-                return;
-            }
-            if (data.type === 'error') {
-                console.error('[claude-quota] API error:', data.error?.message);
-                this._label.set_text('erro');
+            if (err || !data || data.type === 'error') {
+                console.error('[claude-quota] API error:', err ?? data?.error?.message);
                 return;
             }
             this._apiData = data;

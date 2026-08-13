@@ -228,6 +228,13 @@ export default class ClaudeQuotaExtension extends Extension {
 
         Main.panel.addToStatusArea('claude-quota', this._indicator);
 
+        this._menuConn = menu.connect('open-state-changed', (_, open) => {
+            if (open) {
+                this._updateAPI();
+                this._updateLocal();
+            }
+        });
+
         this._apiData = null;
         this._updateAPI();
         this._updateLocal();
@@ -243,6 +250,10 @@ export default class ClaudeQuotaExtension extends Extension {
     }
 
     disable() {
+        if (this._menuConn) {
+            this._indicator?.menu.disconnect(this._menuConn);
+            this._menuConn = null;
+        }
         [this._apiTimer, this._localTimer].forEach(id => {
             if (id) GLib.source_remove(id);
         });

@@ -11,23 +11,28 @@ Extensão do GNOME Shell que exibe o uso de tokens do [Claude Code](https://clau
 **Ao clicar:**
 
 ```
-── Uso de Tokens Hoje ─────────────────
+── Hoje ───────────────────────────────
   32.2K / 500K tokens          6%
   [████░░░░░░░░░░░░░░░░░░░░░░░░]
 
+── Esta Semana ────────────────────────
+  128K / 3.5M tokens           3%
+  [██░░░░░░░░░░░░░░░░░░░░░░░░░░]
+
 ── Detalhes ───────────────────────────
-  Entrada:        0.1K
-  Saída:          32.2K
-  Cache lido:     1.2M
-  Prompts hoje:   12
-  Sessões ativas: 1
+  Entrada:          0.1K
+  Saída:            32.2K
+  Cache lido:       1.2M
+  Prompts hoje:     12
+  Prompts semana:   47
+  Sessões ativas:   1
 
 ── Último prompt ───────────────────────
-  há 5m
+  há 5min
   "adicionar barra de progresso ao uso de tokens"
 ```
 
-A barra de progresso fica **amarela** aos 60% e **vermelha** aos 80% do limite diário.
+As barras ficam **amarelas** aos 60% e **vermelhas** aos 80% dos respectivos limites.
 
 ## Requisitos
 
@@ -62,15 +67,20 @@ bash install.sh
 
 Depois reinicie o GNOME Shell: `Alt+F2` → `r` → `Enter`.
 
-## Configurar o limite diário de tokens
+## Configurar os limites de tokens
 
-Abra as preferências para definir seu orçamento diário de tokens (padrão: 500 000):
+Abra as preferências para definir os limites diário e semanal:
 
 ```bash
 gnome-extensions prefs claude-quota@monitor
 ```
 
 Ou acesse **Configurações → Extensões → Claude Code Quota Monitor → Preferências**.
+
+| Campo | Padrão |
+|---|---|
+| Limite diário | 500 000 tokens |
+| Limite semanal | 3 500 000 tokens |
 
 ## Como funciona
 

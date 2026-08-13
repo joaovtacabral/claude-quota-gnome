@@ -37,16 +37,26 @@ function formatRelative(ms, nowMs) {
     return `há ${Math.floor(hrs / 24)}d`;
 }
 
-function gatherStats() {
-    const home     = GLib.get_home_dir();
-    const todayStr = new Date().toISOString().slice(0, 10);
-    const nowMs    = Date.now();
+function weekStartMs() {
+    const now = new Date();
+    const day = now.getDay(); // 0=Dom … 6=Sáb
+    const daysFromMonday = day === 0 ? 6 : day - 1;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - daysFromMonday);
+    monday.setHours(0, 0, 0, 0);
+    return monday.getTime();
+}
 
-    let inputTokens  = 0;
-    let outputTokens = 0;
-    let cacheRead    = 0;
-    let promptsToday = 0;
-    let lastActivity = null; // { ms, text }
+function gatherStats() {
+    const home        = GLib.get_home_dir();
+    const todayStr    = new Date().toISOString().slice(0, 10);
+    const nowMs       = Date.now();
+    const weekMs      = weekStartMs();
+
+    let dayInput = 0, dayOutput = 0, dayCacheRead = 0;
+    let weekInput = 0, weekOutput = 0;
+    let promptsToday = 0, promptsWeek = 0;
+    let lastActivity  = null;
     let activeSessions = 0;
 
     // ── Token usage from project conversation files ───────────────────────────
@@ -71,13 +81,19 @@ function gatherStats() {
                     try {
                         const entry = JSON.parse(line);
                         const ts = entry.timestamp;
-                        if (!ts || !String(ts).startsWith(todayStr)) continue;
-                        // Recursively find the first usage object
+                        if (!ts) continue;
+                        const entryMs = new Date(ts).getTime();
+                        if (entryMs < weekMs) continue; // fora da semana, ignora
                         const usage = findUsage(entry);
-                        if (usage) {
-                            inputTokens  += usage.input_tokens                ?? 0;
-                            outputTokens += usage.output_tokens               ?? 0;
-                            cacheRead    += usage.cache_read_input_tokens      ?? 0;
+                        if (!usage) continue;
+                        // semanal
+                        weekInput  += usage.input_tokens           ?? 0;
+                        weekOutput += usage.output_tokens          ?? 0;
+                        // diário
+                        if (String(ts).startsWith(todayStr)) {
+                            dayInput     += usage.input_tokens                ?? 0;
+                            dayOutput    += usage.output_tokens               ?? 0;
+                            dayCacheRead += usage.cache_read_input_tokens     ?? 0;
                         }
                     } catch (_) {}
                 }
@@ -95,11 +111,15 @@ function gatherStats() {
                 const entry = JSON.parse(line);
                 const ts = entry.timestamp;
                 if (!ts) continue;
-                const date = new Date(ts).toISOString().slice(0, 10);
-                if (date !== todayStr) continue;
-                promptsToday++;
-                if (!lastActivity || ts > lastActivity.ms) {
-                    lastActivity = { ms: ts, text: entry.display ?? '' };
+                const entryMs = new Date(ts).getTime();
+                if (entryMs >= weekMs) {
+                    promptsWeek++;
+                    const date = new Date(ts).toISOString().slice(0, 10);
+                    if (date === todayStr) {
+                        promptsToday++;
+                        if (!lastActivity || ts > lastActivity.ms)
+                            lastActivity = { ms: ts, text: entry.display ?? '' };
+                    }
                 }
             } catch (_) {}
         }
@@ -123,13 +143,13 @@ function gatherStats() {
     } catch (_) {}
 
     return {
-        inputTokens,
-        outputTokens,
-        cacheRead,
-        totalTokens: inputTokens + outputTokens,
-        promptsToday,
+        dayInput, dayOutput, dayCacheRead,
+        dayTotal: dayInput + dayOutput,
+        weekInput, weekOutput,
+        weekTotal: weekInput + weekOutput,
+        promptsToday, promptsWeek,
         activeSessions,
-        lastTime: lastActivity ? formatRelative(lastActivity.ms, nowMs) : 'never',
+        lastTime: lastActivity ? formatRelative(lastActivity.ms, nowMs) : 'nunca',
         lastText: lastActivity?.text ?? '',
     };
 }
@@ -170,41 +190,43 @@ export default class ClaudeQuotaExtension extends Extension {
         // ── Popup menu ──────────────────────────────────────────────────────
         const menu = this._indicator.menu;
 
-        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Uso de Tokens Hoje'));
+        // helper: builds a labelled progress bar section
+        const addBar = (title) => {
+            menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(title));
+            const item    = new PopupMenu.PopupBaseMenuItem({ reactive: false, can_focus: false });
+            const box     = new St.BoxLayout({ vertical: true, x_expand: true, style: 'padding: 2px 0;' });
+            const row     = new St.BoxLayout({ x_expand: true });
+            const lbl     = new St.Label({ text: '—', x_expand: true });
+            const pct     = new St.Label({ text: '—', x_align: Clutter.ActorAlign.END });
+            row.add_child(lbl);
+            row.add_child(pct);
+            const bg   = new St.Widget({ style: `width: ${BAR_WIDTH}px; height: 10px; background-color: rgba(255,255,255,0.15); border-radius: 5px; margin-top: 4px;` });
+            const fill = new St.Widget({ style: `width: 0px; height: 10px; background-color: #57e389; border-radius: 5px;` });
+            bg.add_child(fill);
+            box.add_child(row);
+            box.add_child(bg);
+            item.add_child(box);
+            menu.addMenuItem(item);
+            return { lbl, pct, fill };
+        };
 
-        // Progress bar item
-        const barItem = new PopupMenu.PopupBaseMenuItem({ reactive: false, can_focus: false });
-        const barBox  = new St.BoxLayout({ vertical: true, x_expand: true, style: 'padding: 2px 0;' });
-
-        const labelRow = new St.BoxLayout({ x_expand: true });
-        this._barLabel   = new St.Label({ text: '—', x_expand: true });
-        this._barPercent = new St.Label({ text: '—', x_align: Clutter.ActorAlign.END });
-        labelRow.add_child(this._barLabel);
-        labelRow.add_child(this._barPercent);
-
-        this._barBg = new St.Widget({
-            style: `width: ${BAR_WIDTH}px; height: 10px; background-color: rgba(255,255,255,0.15); border-radius: 5px; margin-top: 4px;`,
-        });
-        this._barFill = new St.Widget({
-            style: `width: 0px; height: 10px; background-color: #57e389; border-radius: 5px;`,
-        });
-        this._barBg.add_child(this._barFill);
-
-        barBox.add_child(labelRow);
-        barBox.add_child(this._barBg);
-        barItem.add_child(barBox);
-        menu.addMenuItem(barItem);
+        const dayBar  = addBar('Hoje');
+        this._dayBar  = dayBar;
+        const weekBar = addBar('Esta Semana');
+        this._weekBar = weekBar;
 
         menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Detalhes'));
         this._inputItem    = new PopupMenu.PopupMenuItem('', { reactive: false });
         this._outputItem   = new PopupMenu.PopupMenuItem('', { reactive: false });
         this._cacheItem    = new PopupMenu.PopupMenuItem('', { reactive: false });
         this._promptsItem  = new PopupMenu.PopupMenuItem('', { reactive: false });
+        this._wPromptsItem = new PopupMenu.PopupMenuItem('', { reactive: false });
         this._sessionsItem = new PopupMenu.PopupMenuItem('', { reactive: false });
         menu.addMenuItem(this._inputItem);
         menu.addMenuItem(this._outputItem);
         menu.addMenuItem(this._cacheItem);
         menu.addMenuItem(this._promptsItem);
+        menu.addMenuItem(this._wPromptsItem);
         menu.addMenuItem(this._sessionsItem);
 
         menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Último prompt'));
@@ -234,27 +256,33 @@ export default class ClaudeQuotaExtension extends Extension {
 
     _update() {
         try {
-            const stats = gatherStats();
-            const limit = this._settings.get_int('daily-token-limit');
-            const pct   = Math.min(1, stats.totalTokens / limit);
-            const pctRounded = Math.round(pct * 100);
+            const stats     = gatherStats();
+            const dayLimit  = this._settings.get_int('daily-token-limit');
+            const weekLimit = this._settings.get_int('weekly-token-limit');
 
             // Panel label
             const badge = stats.activeSessions > 0 ? ` [${stats.activeSessions}]` : '';
-            this._label.set_text(`${formatTokens(stats.totalTokens)}${badge}`);
+            this._label.set_text(`${formatTokens(stats.dayTotal)}${badge}`);
 
-            // Progress bar fill + colour
-            const fillPx = Math.max(0, Math.round(pct * BAR_WIDTH));
-            const color   = pct < 0.6 ? '#57e389' : pct < 0.8 ? '#f5c211' : '#e01b24';
-            this._barFill.style = `width: ${fillPx}px; height: 10px; background-color: ${color}; border-radius: 5px;`;
-            this._barLabel.set_text(`${formatTokens(stats.totalTokens)} / ${formatTokens(limit)} tokens`);
-            this._barPercent.set_text(`${pctRounded}%`);
+            // Helper: update one bar
+            const applyBar = (bar, used, limit) => {
+                const pct    = Math.min(1, used / limit);
+                const fillPx = Math.max(0, Math.round(pct * BAR_WIDTH));
+                const color  = pct < 0.6 ? '#57e389' : pct < 0.8 ? '#f5c211' : '#e01b24';
+                bar.fill.style = `width: ${fillPx}px; height: 10px; background-color: ${color}; border-radius: 5px;`;
+                bar.lbl.set_text(`${formatTokens(used)} / ${formatTokens(limit)} tokens`);
+                bar.pct.set_text(`${Math.round(pct * 100)}%`);
+            };
+
+            applyBar(this._dayBar,  stats.dayTotal,  dayLimit);
+            applyBar(this._weekBar, stats.weekTotal, weekLimit);
 
             // Breakdown
-            this._inputItem.label.set_text(`  Entrada:        ${formatTokens(stats.inputTokens)}`);
-            this._outputItem.label.set_text(`  Saída:          ${formatTokens(stats.outputTokens)}`);
-            this._cacheItem.label.set_text(`  Cache lido:     ${formatTokens(stats.cacheRead)}`);
-            this._promptsItem.label.set_text(`  Prompts hoje:   ${stats.promptsToday}`);
+            this._inputItem.label.set_text(`  Entrada:          ${formatTokens(stats.dayInput)}`);
+            this._outputItem.label.set_text(`  Saída:            ${formatTokens(stats.dayOutput)}`);
+            this._cacheItem.label.set_text(`  Cache lido:       ${formatTokens(stats.dayCacheRead)}`);
+            this._promptsItem.label.set_text(`  Prompts hoje:    ${stats.promptsToday}`);
+            this._wPromptsItem.label.set_text(`  Prompts semana: ${stats.promptsWeek}`);
             this._sessionsItem.label.set_text(`  Sessões ativas: ${stats.activeSessions}`);
 
             // Last prompt

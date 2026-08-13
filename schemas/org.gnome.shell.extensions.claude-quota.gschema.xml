@@ -7,5 +7,10 @@
       <summary>Daily token limit</summary>
       <description>Your daily token budget (input + output). Used for the progress bar.</description>
     </key>
+    <key name="weekly-token-limit" type="i">
+      <default>3500000</default>
+      <summary>Weekly token limit</summary>
+      <description>Your weekly token budget (input + output). Used for the weekly progress bar.</description>
+    </key>
   </schema>
 </schemalist>

@@ -10,7 +10,7 @@ export default class ClaudeQuotaPreferences extends ExtensionPreferences {
         const page  = new Adw.PreferencesPage({ title: 'Claude Quota' });
         const group = new Adw.PreferencesGroup({ title: 'Orçamento de Tokens', description: 'Define o máximo da barra de progresso.' });
 
-        const row = new Adw.SpinRow({
+        const dayRow = new Adw.SpinRow({
             title: 'Limite diário de tokens',
             subtitle: 'Tokens de entrada + saída por dia (padrão: 500 000)',
             adjustment: new Gtk.Adjustment({
@@ -21,10 +21,23 @@ export default class ClaudeQuotaPreferences extends ExtensionPreferences {
                 value: settings.get_int('daily-token-limit'),
             }),
         });
+        settings.bind('daily-token-limit', dayRow, 'value', Gio.SettingsBindFlags.DEFAULT);
 
-        settings.bind('daily-token-limit', row, 'value', Gio.SettingsBindFlags.DEFAULT);
+        const weekRow = new Adw.SpinRow({
+            title: 'Limite semanal de tokens',
+            subtitle: 'Tokens de entrada + saída por semana (padrão: 3 500 000)',
+            adjustment: new Gtk.Adjustment({
+                lower: 50_000,
+                upper: 70_000_000,
+                step_increment: 50_000,
+                page_increment: 500_000,
+                value: settings.get_int('weekly-token-limit'),
+            }),
+        });
+        settings.bind('weekly-token-limit', weekRow, 'value', Gio.SettingsBindFlags.DEFAULT);
 
-        group.add(row);
+        group.add(dayRow);
+        group.add(weekRow);
         page.add(group);
         window.add(page);
     }

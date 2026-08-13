@@ -327,11 +327,6 @@ export default class ClaudeQuotaExtension extends Extension {
             this._weekItem.label.set_text(`  Prompts semana:  ${s.promptsWeek}`);
             this._sessItem.label.set_text(`  Sessões ativas:  ${s.activeSessions}`);
 
-            // Badge de sessão ativa no painel
-            if (s.activeSessions > 0 && this._label.get_text() !== '…') {
-                const cur = this._label.get_text().replace(/ \[\d+\]$/, '');
-                this._label.set_text(`${cur} [${s.activeSessions}]`);
-            }
         } catch (e) {
             console.error('[claude-quota]', e);
         }

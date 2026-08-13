@@ -4,6 +4,5 @@
   "uuid": "claude-quota@monitor",
   "version": 2,
   "shell-version": ["45", "46", "47"],
-  "settings-schema": "org.gnome.shell.extensions.claude-quota",
-  "url": "https://github.com/joaovtacabral/claude-quota-gnome"
+"url": "https://github.com/joaovtacabral/claude-quota-gnome"
 }

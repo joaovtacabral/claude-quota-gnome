@@ -7,7 +7,7 @@ export default class ClaudeQuotaPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
 
-        const page  = new Adw.PreferencesPage({ title: 'Claude Quota', icon_name: 'dialog-information-symbolic' });
+        const page  = new Adw.PreferencesPage({ title: 'Claude Quota' });
         const group = new Adw.PreferencesGroup({ title: 'Token Budget', description: 'Controls the progress bar maximum.' });
 
         const row = new Adw.SpinRow({

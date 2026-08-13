@@ -153,8 +153,9 @@ export default class ClaudeQuotaExtension extends Extension {
 
         // Panel label
         const box = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
+        const svgPath = GLib.build_filenamev([this.path, 'claude-code.svg']);
         this._icon = new St.Icon({
-            icon_name: 'dialog-information-symbolic',
+            gicon: Gio.icon_new_for_string(svgPath),
             style_class: 'system-status-icon',
         });
         this._label = new St.Label({

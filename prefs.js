@@ -8,11 +8,11 @@ export default class ClaudeQuotaPreferences extends ExtensionPreferences {
         const settings = this.getSettings();
 
         const page  = new Adw.PreferencesPage({ title: 'Claude Quota' });
-        const group = new Adw.PreferencesGroup({ title: 'Token Budget', description: 'Controls the progress bar maximum.' });
+        const group = new Adw.PreferencesGroup({ title: 'Orçamento de Tokens', description: 'Define o máximo da barra de progresso.' });
 
         const row = new Adw.SpinRow({
-            title: 'Daily token limit',
-            subtitle: 'Input + output tokens per day (default: 500 000)',
+            title: 'Limite diário de tokens',
+            subtitle: 'Tokens de entrada + saída por dia (padrão: 500 000)',
             adjustment: new Gtk.Adjustment({
                 lower: 10_000,
                 upper: 10_000_000,

@@ -30,11 +30,11 @@ function formatTokens(n) {
 function formatRelative(ms, nowMs) {
     const diff = Math.max(0, nowMs - ms);
     const mins = Math.floor(diff / 60_000);
-    if (mins < 1)  return 'just now';
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1)  return 'agora mesmo';
+    if (mins < 60) return `há ${mins}min`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24)  return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
+    if (hrs < 24)  return `há ${hrs}h`;
+    return `há ${Math.floor(hrs / 24)}d`;
 }
 
 function gatherStats() {
@@ -170,7 +170,7 @@ export default class ClaudeQuotaExtension extends Extension {
         // ── Popup menu ──────────────────────────────────────────────────────
         const menu = this._indicator.menu;
 
-        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Token Usage Today'));
+        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Uso de Tokens Hoje'));
 
         // Progress bar item
         const barItem = new PopupMenu.PopupBaseMenuItem({ reactive: false, can_focus: false });
@@ -195,7 +195,7 @@ export default class ClaudeQuotaExtension extends Extension {
         barItem.add_child(barBox);
         menu.addMenuItem(barItem);
 
-        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Breakdown'));
+        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Detalhes'));
         this._inputItem    = new PopupMenu.PopupMenuItem('', { reactive: false });
         this._outputItem   = new PopupMenu.PopupMenuItem('', { reactive: false });
         this._cacheItem    = new PopupMenu.PopupMenuItem('', { reactive: false });
@@ -207,7 +207,7 @@ export default class ClaudeQuotaExtension extends Extension {
         menu.addMenuItem(this._promptsItem);
         menu.addMenuItem(this._sessionsItem);
 
-        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Last prompt'));
+        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Último prompt'));
         this._lastTimeItem = new PopupMenu.PopupMenuItem('', { reactive: false });
         this._lastTextItem = new PopupMenu.PopupMenuItem('', { reactive: false });
         menu.addMenuItem(this._lastTimeItem);
@@ -251,11 +251,11 @@ export default class ClaudeQuotaExtension extends Extension {
             this._barPercent.set_text(`${pctRounded}%`);
 
             // Breakdown
-            this._inputItem.label.set_text(`  Input:   ${formatTokens(stats.inputTokens)}`);
-            this._outputItem.label.set_text(`  Output:  ${formatTokens(stats.outputTokens)}`);
-            this._cacheItem.label.set_text(`  Cache read: ${formatTokens(stats.cacheRead)}`);
-            this._promptsItem.label.set_text(`  Prompts today: ${stats.promptsToday}`);
-            this._sessionsItem.label.set_text(`  Active sessions: ${stats.activeSessions}`);
+            this._inputItem.label.set_text(`  Entrada:        ${formatTokens(stats.inputTokens)}`);
+            this._outputItem.label.set_text(`  Saída:          ${formatTokens(stats.outputTokens)}`);
+            this._cacheItem.label.set_text(`  Cache lido:     ${formatTokens(stats.cacheRead)}`);
+            this._promptsItem.label.set_text(`  Prompts hoje:   ${stats.promptsToday}`);
+            this._sessionsItem.label.set_text(`  Sessões ativas: ${stats.activeSessions}`);
 
             // Last prompt
             this._lastTimeItem.label.set_text(`  ${stats.lastTime}`);

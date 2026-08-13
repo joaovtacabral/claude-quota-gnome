@@ -5,8 +5,8 @@ A GNOME Shell extension that shows your [Claude Code](https://claude.ai/code) to
 ## What it shows
 
 **In the top bar:**
-- Claude Code icon + `32.2K` — tokens used today (input + output)
-- Claude Code icon + `32.2K [1]` — with an active Claude Code session running
+- `[icon] 32.2K` — tokens used today (input + output)
+- `[icon] 32.2K [1]` — with an active Claude Code session running
 
 **Click to expand:**
 

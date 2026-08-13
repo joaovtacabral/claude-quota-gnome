@@ -1,40 +1,40 @@
 # Claude Code Quota Monitor
 
-A GNOME Shell extension that shows your [Claude Code](https://claude.ai/code) token usage and a live progress bar in the top bar.
+Extensão do GNOME Shell que exibe o uso de tokens do [Claude Code](https://claude.ai/code) com uma barra de progresso na barra superior.
 
-## What it shows
+## O que exibe
 
-**In the top bar:**
-- `[icon] 32.2K` — tokens used today (input + output)
-- `[icon] 32.2K [1]` — with an active Claude Code session running
+**Na barra superior:**
+- `[ícone] 32.2K` — tokens usados hoje (entrada + saída)
+- `[ícone] 32.2K [1]` — com uma sessão do Claude Code ativa
 
-**Click to expand:**
+**Ao clicar:**
 
 ```
-── Token Usage Today ──────────────────
+── Uso de Tokens Hoje ─────────────────
   32.2K / 500K tokens          6%
   [████░░░░░░░░░░░░░░░░░░░░░░░░]
 
-── Breakdown ──────────────────────────
-  Input:        0.1K
-  Output:       32.2K
-  Cache read:   1.2M
-  Prompts today: 12
-  Active sessions: 1
+── Detalhes ───────────────────────────
+  Entrada:        0.1K
+  Saída:          32.2K
+  Cache lido:     1.2M
+  Prompts hoje:   12
+  Sessões ativas: 1
 
-── Last prompt ────────────────────────
-  5m ago
-  "add a progress bar to the token usage"
+── Último prompt ───────────────────────
+  há 5m
+  "adicionar barra de progresso ao uso de tokens"
 ```
 
-The progress bar turns **yellow** at 60% and **red** at 80% of your daily limit.
+A barra de progresso fica **amarela** aos 60% e **vermelha** aos 80% do limite diário.
 
-## Requirements
+## Requisitos
 
-- GNOME Shell 45, 46, or 47
-- [Claude Code](https://claude.ai/code) installed and used at least once
+- GNOME Shell 45, 46 ou 47
+- [Claude Code](https://claude.ai/code) instalado e usado ao menos uma vez
 
-## Installation
+## Instalação
 
 ```bash
 git clone https://github.com/joaovtacabral/claude-quota-gnome.git
@@ -42,36 +42,46 @@ cd claude-quota-gnome
 bash install.sh
 ```
 
-Then enable the extension:
+Em seguida, ative a extensão:
 
 ```bash
 gnome-extensions enable claude-quota@monitor
 ```
 
-Or use the **Extensions** app (available in Ubuntu Software) to toggle it on.
+Ou use o app **Extensões** (disponível na Ubuntu Software) para ativá-la.
 
-> If GNOME Shell doesn't pick it up, restart it with `Alt+F2` → type `r` → `Enter`.
+> Se o GNOME Shell não carregar a extensão, reinicie com `Alt+F2` → digite `r` → `Enter`.
 
-## Configuring the daily token limit
+## Atualizar
 
-Open preferences to set your daily token budget (default: 500 000):
+```bash
+cd claude-quota-gnome
+git pull
+bash install.sh
+```
+
+Depois reinicie o GNOME Shell: `Alt+F2` → `r` → `Enter`.
+
+## Configurar o limite diário de tokens
+
+Abra as preferências para definir seu orçamento diário de tokens (padrão: 500 000):
 
 ```bash
 gnome-extensions prefs claude-quota@monitor
 ```
 
-Or go to **Settings → Extensions → Claude Code Quota Monitor → Preferences**.
+Ou acesse **Configurações → Extensões → Claude Code Quota Monitor → Preferências**.
 
-## How it works
+## Como funciona
 
-Reads token usage directly from `~/.claude/projects/**/*.jsonl` — the same files Claude Code uses to store conversation history. No API key required, no network requests.
+Lê o uso de tokens diretamente de `~/.claude/projects/**/*.jsonl` — os mesmos arquivos que o Claude Code usa para armazenar o histórico de conversas. Não requer chave de API nem conexão com a internet.
 
-Updates every 60 seconds.
+Atualiza a cada 60 segundos.
 
-## Icon
+## Ícone
 
-The panel icon is `claude-code.svg`, bundled with the extension and loaded directly from disk — no system icon theme required. To swap it out, replace `claude-code.svg` in the extension directory (`~/.local/share/gnome-shell/extensions/claude-quota@monitor/`) with any same-named SVG and restart GNOME Shell.
+O ícone na barra é o `claude-code.svg`, incluído junto com a extensão e carregado diretamente do disco — sem depender do tema de ícones do sistema. Para substituí-lo, basta trocar o arquivo `claude-code.svg` no diretório da extensão (`~/.local/share/gnome-shell/extensions/claude-quota@monitor/`) por outro SVG com o mesmo nome e reiniciar o GNOME Shell.
 
-## License
+## Licença
 
 MIT

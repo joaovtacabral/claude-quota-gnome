@@ -257,17 +257,14 @@ export default class ClaudeQuotaExtension extends Extension {
     }
 
     _updateAPI() {
-        if (this._fetching) return;
         const creds = readCredentials();
         if (!creds) {
             this._label.set_text('sem token');
             return;
         }
 
-        this._fetching = true;
         this._startSpinner();
         fetchQuota(creds.token, (err, data) => {
-            this._fetching = false;
             this._stopSpinner();
             if (err || !data || data.type === 'error') {
                 console.error('[claude-quota] API error:', err ?? data?.error?.message);

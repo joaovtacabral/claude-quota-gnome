@@ -29,10 +29,6 @@ Extensão do GNOME Shell que exibe a quota real do [Claude Code](https://claude.
   Prompts hoje:    12
   Prompts semana:  47
   Sessões ativas:  1
-
-── Último prompt ───────────────────────
-  há 5min
-  "atualizar o README com as últimas mudanças"
 ```
 
 As barras ficam **amarelas** aos 60% e **vermelhas** aos 80%.

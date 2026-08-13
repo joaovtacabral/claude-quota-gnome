@@ -210,8 +210,10 @@ export default class ClaudeQuotaExtension extends Extension {
         this._apiData = null;
         // Delay inicial para garantir que o shell terminou de carregar
         GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 2, () => {
-            this._updateAPI();
-            this._updateLocal();
+            if (this._label) {
+                this._updateAPI();
+                this._updateLocal();
+            }
             return false;
         });
 
@@ -270,6 +272,9 @@ export default class ClaudeQuotaExtension extends Extension {
             this._stopSpinner();
             if (err || !data || data.type === 'error') {
                 console.error('[claude-quota] API error:', err ?? data?.error?.message);
+                // Restaura último dado conhecido, ou mostra "—" se for a primeira chamada
+                if (this._apiData) this._applyAPIData(creds.plan);
+                else this._label.set_text('—');
                 return;
             }
             this._apiData = data;

@@ -162,9 +162,6 @@ export default class ClaudeQuotaExtension extends Extension {
 
         // Menu
         const menu = this._indicator.menu;
-        this._planItem = new PopupMenu.PopupSeparatorMenuItem('Claude');
-        menu.addMenuItem(this._planItem);
-
         // Barras dinâmicas por grupo (session, daily, weekly, monthly)
         this._groupBars = {};
         for (const [key, label] of Object.entries(GROUP_LABELS)) {
@@ -244,7 +241,7 @@ export default class ClaudeQuotaExtension extends Extension {
         if (this._spinnerTimer) return;
         let frame = 0;
         this._spinnerTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 120, () => {
-            this._planItem.label.set_text(`Consultando ${SPINNER[frame++ % SPINNER.length]}`);
+            this._label.set_text(SPINNER[frame++ % SPINNER.length]);
             return GLib.SOURCE_CONTINUE;
         });
     }
@@ -269,13 +266,11 @@ export default class ClaudeQuotaExtension extends Extension {
             if (err || !data) {
                 console.error('[claude-quota] API error:', err);
                 this._label.set_text('erro');
-                this._planItem.label.set_text('Erro ao consultar');
                 return;
             }
             if (data.type === 'error') {
                 console.error('[claude-quota] API error:', data.error?.message);
                 this._label.set_text('erro');
-                this._planItem.label.set_text(data.error?.message ?? 'Erro na API');
                 return;
             }
             this._apiData = data;
@@ -286,11 +281,6 @@ export default class ClaudeQuotaExtension extends Extension {
     _applyAPIData(plan) {
         const data = this._apiData;
         if (!data) return;
-
-        const planName = plan
-            ? `Claude ${plan.charAt(0).toUpperCase() + plan.slice(1)}`
-            : 'Claude';
-        this._planItem.label.set_text(planName);
 
         for (const bar of Object.values(this._groupBars)) {
             bar.sep.visible  = false;

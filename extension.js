@@ -159,7 +159,7 @@ export default class ClaudeQuotaExtension extends Extension {
             style_class: 'system-status-icon',
         });
         this._label = new St.Label({
-            text: 'Claude …',
+            text: '…',
             y_align: Clutter.ActorAlign.CENTER,
             style: 'margin-left: 4px;',
         });
@@ -241,7 +241,7 @@ export default class ClaudeQuotaExtension extends Extension {
 
             // Panel label
             const badge = stats.activeSessions > 0 ? ` [${stats.activeSessions}]` : '';
-            this._label.set_text(`⚡ ${formatTokens(stats.totalTokens)}${badge}`);
+            this._label.set_text(`${formatTokens(stats.totalTokens)}${badge}`);
 
             // Progress bar fill + colour
             const fillPx = Math.max(0, Math.round(pct * BAR_WIDTH));
@@ -264,7 +264,7 @@ export default class ClaudeQuotaExtension extends Extension {
                 : stats.lastText;
             this._lastTextItem.label.set_text(`  ${preview || '—'}`);
         } catch (e) {
-            this._label.set_text('Claude ?');
+            this._label.set_text('?');
             console.error('[claude-quota]', e);
         }
     }

@@ -263,7 +263,7 @@ export default class ClaudeQuotaExtension extends Extension {
     _updateAPI() {
         const creds = readCredentials();
         if (!creds) {
-            this._label.set_text('sem token');
+            this._label.set_text('—');
             return;
         }
 
